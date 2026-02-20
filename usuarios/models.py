@@ -130,6 +130,8 @@ class Usuario(AbstractUser):
     objects = UsuarioManager()
 
     def save(self, *args, **kwargs):
+        if self.dni and self.username != self.dni:
+            self.username = self.dni
         if self.rol != self.Rol.ALUMNO:
             self.alumno = None
         super().save(*args, **kwargs)
