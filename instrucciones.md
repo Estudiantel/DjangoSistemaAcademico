@@ -67,6 +67,7 @@ El sistema debe incluir autenticación con roles:
 | Administrador | Puede crear, modificar y eliminar: carreras, materias, alumnos y usuarios. Puede ver todas las inscripciones.    |
 | Alumno        | Puede ver la oferta académica, inscribirse o darse de baja de materias. Solo ve sus datos.                       |
 | Invitado      | Solo puede ver carreras y materias. Sin acceso a edición ni inscripción.                                         |
+| Docente       | Puede ver sus materias y listas de alumnos (solo visual).                                                        |
 
 7. **Inicio de sesión y autenticación** 
 - Los usuarios inician sesión con DNI y correo electrónico registrados. 
@@ -180,4 +181,5 @@ El examen evaluará:
 - Documenta el proyecto con un README.md (cómo instalar, configurar, correr). 
 - Usa migrations correctamente. 
 - Prueba todas las funcionalidades antes de entregar.
+
 
