@@ -4,19 +4,18 @@ from django.contrib.auth.backends import ModelBackend
 
 class DNIMailBackend(ModelBackend):
     """
-    Permite autenticación con DNI + email + contraseña.
+    Permite autenticación con DNI + contraseña.
     """
 
-    def authenticate(self, request, dni=None, email=None, password=None, **kwargs):
+    def authenticate(self, request, dni=None, password=None, **kwargs):
         UserModel = get_user_model()
-        dni = dni or kwargs.get(UserModel.USERNAME_FIELD)
-        email = email or kwargs.get('email')
+        dni = dni or kwargs.get(UserModel.USERNAME_FIELD) or kwargs.get('username')
 
-        if not dni or not email or not password:
+        if not dni or not password:
             return None
 
         try:
-            user = UserModel.objects.get(dni=dni, email__iexact=email)
+            user = UserModel.objects.get(dni=dni)
         except UserModel.DoesNotExist:
             UserModel().set_password(password)
             return None

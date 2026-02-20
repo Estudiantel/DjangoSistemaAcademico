@@ -8,6 +8,7 @@ from .models import Alumno, Carrera, Inscripcion, Materia, Usuario
 class AlumnoAdmin(admin.ModelAdmin):
     list_display = ('apellido', 'nombre', 'dni', 'email', 'legajo')
     search_fields = ('apellido', 'nombre', 'dni', 'email', 'legajo')
+    fields = ('nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera')
 
 
 @admin.register(Carrera)
