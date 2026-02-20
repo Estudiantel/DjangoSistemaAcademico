@@ -1,10 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import redirect
+from django.contrib.auth.views import PasswordChangeView
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from .models import Alumno, Carrera, Materia, Usuario
+from .services import inscribir_alumno
 
 
 class RolRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -42,6 +46,19 @@ class DeleteSuccessMessageMixin:
         if self.success_message:
             messages.success(self.request, self.success_message)
         return super().form_valid(form)
+
+
+class PrimerLoginPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    template_name = 'registration/password_change_form.html'
+    success_url = reverse_lazy('password_change_done')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.debe_cambiar_password:
+            self.request.user.debe_cambiar_password = False
+            self.request.user.save(update_fields=['debe_cambiar_password'])
+        messages.success(self.request, 'Contraseña actualizada correctamente.')
+        return response
 
 
 class CarreraListView(RolRequiredMixin, ListView):
@@ -119,7 +136,7 @@ class AlumnoListView(RolRequiredMixin, ListView):
 
 class AlumnoCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     model = Alumno
-    fields = ['nombre', 'apellido', 'dni', 'email', 'legajo']
+    fields = ['nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera']
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno creado correctamente.'
@@ -128,7 +145,7 @@ class AlumnoCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
 
 class AlumnoUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Alumno
-    fields = ['nombre', 'apellido', 'dni', 'email', 'legajo']
+    fields = ['nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera']
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno actualizado correctamente.'
@@ -141,3 +158,45 @@ class AlumnoDeleteView(RolRequiredMixin, DeleteSuccessMessageMixin, DeleteView):
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno eliminado correctamente.'
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+
+class MateriaInscripcionListView(RolRequiredMixin, ListView):
+    model = Materia
+    template_name = 'usuarios/materia_inscripcion_list.html'
+    context_object_name = 'materias'
+    allowed_roles = (Usuario.Rol.ALUMNO,)
+
+    def get_queryset(self):
+        alumno = self.request.user.alumno
+        if not alumno or not alumno.carrera:
+            return Materia.objects.none()
+        return Materia.objects.filter(carrera=alumno.carrera).select_related('carrera')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        alumno = self.request.user.alumno
+        if alumno:
+            context['inscripciones_ids'] = set(alumno.inscripciones.values_list('materia_id', flat=True))
+        else:
+            context['inscripciones_ids'] = set()
+        return context
+
+
+class InscribirMateriaView(RolRequiredMixin, View):
+    allowed_roles = (Usuario.Rol.ALUMNO,)
+
+    def post(self, request, *args, **kwargs):
+        alumno = request.user.alumno
+        if not alumno or not alumno.carrera:
+            messages.error(request, 'Tu usuario no tiene una carrera asignada.')
+            return redirect('usuarios:materia-inscripcion-list')
+
+        materia = get_object_or_404(Materia, pk=kwargs['pk'], carrera=alumno.carrera)
+        try:
+            inscribir_alumno(alumno, materia)
+        except ValidationError as error:
+            messages.error(request, error.message)
+        else:
+            messages.success(request, f'Te inscribiste correctamente en {materia.nombre}.')
+
+        return redirect('usuarios:materia-inscripcion-list')
