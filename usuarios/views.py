@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
+from .forms import AlumnoForm, CarreraForm, MateriaForm
 from .models import Alumno, Carrera, Materia, Usuario
 from .services import inscribir_alumno
 
@@ -70,7 +71,7 @@ class CarreraListView(RolRequiredMixin, ListView):
 
 class CarreraCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     model = Carrera
-    fields = ['nombre', 'duracion']
+    form_class = CarreraForm
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:carrera-list')
     success_message = 'Carrera creada correctamente.'
@@ -79,7 +80,7 @@ class CarreraCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
 
 class CarreraUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Carrera
-    fields = ['nombre', 'duracion']
+    form_class = CarreraForm
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:carrera-list')
     success_message = 'Carrera actualizada correctamente.'
@@ -103,7 +104,7 @@ class MateriaListView(RolRequiredMixin, ListView):
 
 class MateriaCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     model = Materia
-    fields = ['nombre', 'carrera', 'cupo_maximo']
+    form_class = MateriaForm
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:materia-list')
     success_message = 'Materia creada correctamente.'
@@ -112,7 +113,7 @@ class MateriaCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
 
 class MateriaUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Materia
-    fields = ['nombre', 'carrera', 'cupo_maximo']
+    form_class = MateriaForm
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:materia-list')
     success_message = 'Materia actualizada correctamente.'
@@ -136,7 +137,7 @@ class AlumnoListView(RolRequiredMixin, ListView):
 
 class AlumnoCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     model = Alumno
-    fields = ['nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera']
+    form_class = AlumnoForm
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno creado correctamente.'
@@ -145,7 +146,7 @@ class AlumnoCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
 
 class AlumnoUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Alumno
-    fields = ['nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera']
+    form_class = AlumnoForm
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno actualizado correctamente.'
