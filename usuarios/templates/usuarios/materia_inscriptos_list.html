@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Alumnos inscriptos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Inscriptos en {{ materia.nombre }}</h1>
+  <a href="{% url 'usuarios:materia-list' %}" class="btn btn-outline-secondary">Volver a Materias</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Legajo</th>
+        <th>Apellido y Nombre</th>
+        <th>DNI</th>
+        <th>Email</th>
+        <th>Fecha de inscripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inscripcion in inscripciones %}
+        <tr>
+          <td>{{ inscripcion.alumno.legajo }}</td>
+          <td>{{ inscripcion.alumno.apellido }}, {{ inscripcion.alumno.nombre }}</td>
+          <td>{{ inscripcion.alumno.dni }}</td>
+          <td>{{ inscripcion.alumno.email }}</td>
+          <td>{{ inscripcion.fecha_inscripcion|date:'d/m/Y H:i' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="text-center">No hay alumnos inscriptos en esta materia.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -22,7 +22,8 @@
             <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:alumno-list' %}">Alumnos</a></li>
           {% endif %}
           {% if user.rol == 'ALUMNO' %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:materia-inscripcion-list' %}">Inscripciones</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:oferta-academica' %}">Oferta Académica</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:mis-materias' %}">Mis Materias</a></li>
           {% endif %}
         {% endif %}
       </ul>

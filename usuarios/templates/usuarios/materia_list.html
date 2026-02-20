@@ -10,6 +10,23 @@
   {% endif %}
 </div>
 
+{% if user.is_superuser or user.rol == 'ADMINISTRADOR' %}
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+      <select name="carrera" class="form-select">
+        <option value="">Todas las carreras</option>
+        {% for carrera in carreras %}
+          <option value="{{ carrera.id }}" {% if carrera_seleccionada == carrera.id|stringformat:'s' %}selected{% endif %}>{{ carrera.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+      <a href="{% url 'usuarios:materia-list' %}" class="btn btn-outline-secondary">Limpiar</a>
+    </div>
+  </form>
+{% endif %}
+
 <div class="table-responsive">
   <table class="table table-striped table-hover align-middle">
     <thead class="table-dark">
@@ -32,6 +49,7 @@
           <td>{{ materia.cupo_disponible }}</td>
           {% if user.is_superuser or user.rol == 'ADMINISTRADOR' %}
             <td class="text-end">
+              <a class="btn btn-sm btn-outline-info" href="{% url 'usuarios:materia-inscriptos' materia.pk %}">Inscriptos</a>
               <a class="btn btn-sm btn-outline-secondary" href="{% url 'usuarios:materia-update' materia.pk %}">Editar</a>
               <a class="btn btn-sm btn-outline-danger" href="{% url 'usuarios:materia-delete' materia.pk %}">Eliminar</a>
             </td>

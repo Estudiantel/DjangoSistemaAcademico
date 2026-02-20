@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from .forms import AlumnoForm, CarreraForm, MateriaForm
-from .models import Alumno, Carrera, Materia, Usuario
+from .models import Alumno, Carrera, Inscripcion, Materia, Usuario
 from .services import inscribir_alumno
 
 
@@ -103,6 +103,23 @@ class MateriaListView(RolRequiredMixin, ListView):
     context_object_name = 'materias'
     allowed_roles = (Usuario.Rol.ADMINISTRADOR, Usuario.Rol.INVITADO, Usuario.Rol.ALUMNO)
 
+    def get_queryset(self):
+        queryset = Materia.objects.select_related('carrera')
+        user = self.request.user
+        if user.is_superuser or user.rol == Usuario.Rol.ADMINISTRADOR:
+            carrera_id = self.request.GET.get('carrera')
+            if carrera_id:
+                queryset = queryset.filter(carrera_id=carrera_id)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_superuser or user.rol == Usuario.Rol.ADMINISTRADOR:
+            context['carreras'] = Carrera.objects.order_by('nombre')
+            context['carrera_seleccionada'] = self.request.GET.get('carrera', '')
+        return context
+
 
 class MateriaCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     model = Materia
@@ -167,9 +184,9 @@ class AlumnoDeleteView(RolRequiredMixin, DeleteSuccessMessageMixin, DeleteView):
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
-class MateriaInscripcionListView(RolRequiredMixin, ListView):
+class OfertaAcademicaView(RolRequiredMixin, ListView):
     model = Materia
-    template_name = 'usuarios/materia_inscripcion_list.html'
+    template_name = 'usuarios/oferta_academica.html'
     context_object_name = 'materias'
     allowed_roles = (Usuario.Rol.ALUMNO,)
 
@@ -196,7 +213,7 @@ class InscribirMateriaView(RolRequiredMixin, View):
         alumno = request.user.alumno
         if not alumno or not alumno.carrera:
             messages.error(request, 'Tu usuario no tiene una carrera asignada.')
-            return redirect('usuarios:materia-inscripcion-list')
+            return redirect('usuarios:oferta-academica')
 
         materia = get_object_or_404(Materia, pk=kwargs['pk'], carrera=alumno.carrera)
         try:
@@ -204,6 +221,62 @@ class InscribirMateriaView(RolRequiredMixin, View):
         except ValidationError as error:
             messages.error(request, error.message)
         else:
-            messages.success(request, f'Te inscribiste correctamente en {materia.nombre}.')
+            messages.success(request, 'Inscripción exitosa.')
 
-        return redirect('usuarios:materia-inscripcion-list')
+        return redirect('usuarios:oferta-academica')
+
+
+class MisMateriasView(RolRequiredMixin, ListView):
+    model = Inscripcion
+    template_name = 'usuarios/mis_materias.html'
+    context_object_name = 'inscripciones'
+    allowed_roles = (Usuario.Rol.ALUMNO,)
+
+    def get_queryset(self):
+        alumno = self.request.user.alumno
+        if not alumno:
+            return Inscripcion.objects.none()
+        return (
+            Inscripcion.objects.filter(alumno=alumno)
+            .select_related('materia', 'materia__carrera')
+            .order_by('materia__nombre')
+        )
+
+
+class BajaMateriaView(RolRequiredMixin, View):
+    allowed_roles = (Usuario.Rol.ALUMNO,)
+
+    def post(self, request, *args, **kwargs):
+        alumno = request.user.alumno
+        if not alumno:
+            messages.error(request, 'Tu usuario no tiene un perfil de alumno asociado.')
+            return redirect('usuarios:mis-materias')
+
+        inscripcion = get_object_or_404(Inscripcion, pk=kwargs['pk'], alumno=alumno)
+        inscripcion.delete()
+        messages.success(request, 'Te diste de baja de la materia correctamente.')
+
+        return redirect('usuarios:mis-materias')
+
+
+class MateriaInscriptosListView(RolRequiredMixin, ListView):
+    model = Inscripcion
+    template_name = 'usuarios/materia_inscriptos_list.html'
+    context_object_name = 'inscripciones'
+    allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+    def dispatch(self, request, *args, **kwargs):
+        self.materia = get_object_or_404(Materia, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return (
+            Inscripcion.objects.filter(materia=self.materia)
+            .select_related('alumno')
+            .order_by('alumno__apellido', 'alumno__nombre')
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['materia'] = self.materia
+        return context
