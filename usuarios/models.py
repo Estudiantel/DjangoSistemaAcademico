@@ -51,6 +51,48 @@ class Alumno(Persona):
     legajo = models.CharField(max_length=30, unique=True)
 
 
+class Carrera(models.Model):
+    nombre = models.CharField(max_length=150, unique=True)
+    duracion = models.PositiveIntegerField(help_text='Duración en años.')
+
+    def __str__(self) -> str:
+        return self.nombre
+
+
+class Materia(models.Model):
+    nombre = models.CharField(max_length=150)
+    carrera = models.ForeignKey(Carrera, on_delete=models.PROTECT, related_name='materias')
+    cupo_maximo = models.PositiveIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['nombre', 'carrera'],
+                name='unique_materia_nombre_por_carrera',
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.nombre} ({self.carrera.nombre})'
+
+
+class Inscripcion(models.Model):
+    alumno = models.ForeignKey(Alumno, on_delete=models.PROTECT, related_name='inscripciones')
+    materia = models.ForeignKey(Materia, on_delete=models.PROTECT, related_name='inscripciones')
+    fecha_inscripcion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['alumno', 'materia'],
+                name='unique_inscripcion_alumno_materia',
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.alumno} - {self.materia}'
+
+
 class Usuario(AbstractUser):
     class Rol(models.TextChoices):
         ADMINISTRADOR = 'ADMINISTRADOR', 'Administrador'
