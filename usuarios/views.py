@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -49,6 +50,20 @@ class DeleteSuccessMessageMixin:
         return super().form_valid(form)
 
 
+class ProtectedDeleteMixin:
+    protected_error_message = (
+        'No se puede eliminar este registro porque tiene otros datos asociados '
+        '(materias, alumnos o inscripciones).'
+    )
+
+    def post(self, request, *args, **kwargs):
+        try:
+            return super().post(request, *args, **kwargs)
+        except models.ProtectedError:
+            messages.error(request, self.protected_error_message)
+            return redirect(self.success_url)
+
+
 class PrimerLoginPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'registration/password_change.html'
     success_url = reverse_lazy('password_change_done')
@@ -89,7 +104,7 @@ class CarreraUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
-class CarreraDeleteView(RolRequiredMixin, DeleteSuccessMessageMixin, DeleteView):
+class CarreraDeleteView(RolRequiredMixin, ProtectedDeleteMixin, DeleteSuccessMessageMixin, DeleteView):
     model = Carrera
     template_name = 'usuarios/confirm_delete.html'
     success_url = reverse_lazy('usuarios:carrera-list')
@@ -141,7 +156,7 @@ class MateriaUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
-class MateriaDeleteView(RolRequiredMixin, DeleteSuccessMessageMixin, DeleteView):
+class MateriaDeleteView(RolRequiredMixin, ProtectedDeleteMixin, DeleteSuccessMessageMixin, DeleteView):
     model = Materia
     template_name = 'usuarios/confirm_delete.html'
     success_url = reverse_lazy('usuarios:materia-list')
@@ -176,7 +191,7 @@ class AlumnoUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
-class AlumnoDeleteView(RolRequiredMixin, DeleteSuccessMessageMixin, DeleteView):
+class AlumnoDeleteView(RolRequiredMixin, ProtectedDeleteMixin, DeleteSuccessMessageMixin, DeleteView):
     model = Alumno
     template_name = 'usuarios/confirm_delete.html'
     success_url = reverse_lazy('usuarios:alumno-list')
