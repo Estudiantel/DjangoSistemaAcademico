@@ -21,12 +21,19 @@
           {% if user.is_superuser or user.rol == 'ADMINISTRADOR' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:alumno-list' %}">Alumnos</a></li>
           {% endif %}
+          {% if user.rol == 'ALUMNO' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:materia-inscripcion-list' %}">Inscripciones</a></li>
+          {% endif %}
         {% endif %}
       </ul>
       <div class="d-flex align-items-center gap-2 text-white">
         {% if user.is_authenticated %}
           <small>{{ user.get_full_name|default:user.dni }} ({{ user.rol|default:'Administrador' }})</small>
-          <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}">Salir</a>
+          <a class="btn btn-outline-light btn-sm" href="{% url 'password_change' %}">Cambiar contraseña</a>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-light btn-sm" type="submit">Salir</button>
+          </form>
         {% else %}
           <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">Ingresar</a>
         {% endif %}

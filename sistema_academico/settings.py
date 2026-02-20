@@ -24,6 +24,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'usuarios.middleware.ForcePasswordChangeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -77,3 +78,7 @@ AUTHENTICATION_BACKENDS = [
     'usuarios.backends.DNIMailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'usuarios:carrera-list'
+LOGOUT_REDIRECT_URL = 'login'

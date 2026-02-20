@@ -49,6 +49,13 @@ class Persona(models.Model):
 
 class Alumno(Persona):
     legajo = models.CharField(max_length=30, unique=True)
+    carrera = models.ForeignKey(
+        'Carrera',
+        on_delete=models.PROTECT,
+        related_name='alumnos',
+        null=True,
+        blank=True,
+    )
 
 
 class Carrera(models.Model):
