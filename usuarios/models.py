@@ -75,6 +75,10 @@ class Materia(models.Model):
     def __str__(self) -> str:
         return f'{self.nombre} ({self.carrera.nombre})'
 
+    @property
+    def cupo_disponible(self) -> int:
+        return max(self.cupo_maximo - self.inscripciones.count(), 0)
+
 
 class Inscripcion(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.PROTECT, related_name='inscripciones')

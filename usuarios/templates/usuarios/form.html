@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-3">{{ view.model._meta.verbose_name|title }} - {{ view.object|default:'Nuevo registro' }}</h1>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Guardar</button>
+            <a class="btn btn-outline-secondary" href="javascript:history.back()">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
