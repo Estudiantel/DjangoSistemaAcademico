@@ -1,2 +1,2 @@
-# DjangoCRUD
-Crud Academico
+# Django Sistema Académico
+Sistema Académico con Django
