@@ -75,6 +75,7 @@ class CarreraCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:carrera-list')
     success_message = 'Carrera creada correctamente.'
+    extra_context = {'titulo': 'Crear Carrera'}
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
@@ -84,6 +85,7 @@ class CarreraUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:carrera-list')
     success_message = 'Carrera actualizada correctamente.'
+    extra_context = {'titulo': 'Editar Carrera'}
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
@@ -108,6 +110,7 @@ class MateriaCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:materia-list')
     success_message = 'Materia creada correctamente.'
+    extra_context = {'titulo': 'Crear Materia'}
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
@@ -117,6 +120,7 @@ class MateriaUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:materia-list')
     success_message = 'Materia actualizada correctamente.'
+    extra_context = {'titulo': 'Editar Materia'}
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
@@ -141,6 +145,7 @@ class AlumnoCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno creado correctamente.'
+    extra_context = {'titulo': 'Crear Alumno'}
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
@@ -150,6 +155,7 @@ class AlumnoUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
     template_name = 'usuarios/form.html'
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno actualizado correctamente.'
+    extra_context = {'titulo': 'Editar Alumno'}
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
 
 
