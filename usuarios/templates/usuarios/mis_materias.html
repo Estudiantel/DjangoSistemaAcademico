@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Materias{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Mis Materias</h1>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Materia</th>
+        <th>Carrera</th>
+        <th>Fecha de inscripción</th>
+        <th class="text-end">Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inscripcion in inscripciones %}
+        <tr>
+          <td>{{ inscripcion.materia.nombre }}</td>
+          <td>{{ inscripcion.materia.carrera.nombre }}</td>
+          <td>{{ inscripcion.fecha_inscripcion|date:'d/m/Y H:i' }}</td>
+          <td class="text-end">
+            <form method="post" action="{% url 'usuarios:materia-baja' inscripcion.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" type="submit">Darse de baja</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="text-center">No estás inscrito en materias actualmente.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
