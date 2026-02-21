@@ -17,6 +17,24 @@ class HomeView(TemplateView):
     template_name = 'home.html'
 
 
+class ProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        alumno = getattr(user, 'alumno', None)
+        nombre = alumno.nombre if alumno else user.first_name
+        apellido = alumno.apellido if alumno else user.last_name
+        nombre_completo = f'{nombre} {apellido}'.strip()
+        context['nombre_completo'] = nombre_completo or user.dni
+        context['dni'] = alumno.dni if alumno else user.dni
+        context['correo'] = alumno.email if alumno else user.email
+        context['alumno'] = alumno
+        context['es_administrador'] = user.is_superuser or user.rol == Usuario.Rol.ADMINISTRADOR
+        return context
+
+
 class RolRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     allowed_roles: tuple[str, ...] = ()
 
