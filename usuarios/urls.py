@@ -5,6 +5,7 @@ from . import views
 app_name = 'usuarios'
 
 urlpatterns = [
+    path('profile/', views.ProfileView.as_view(), name='profile'),
     path('carreras/', views.CarreraListView.as_view(), name='carrera-list'),
     path('carreras/nueva/', views.CarreraCreateView.as_view(), name='carrera-create'),
     path('carreras/<int:pk>/editar/', views.CarreraUpdateView.as_view(), name='carrera-update'),
