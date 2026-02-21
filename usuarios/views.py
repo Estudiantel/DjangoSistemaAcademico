@@ -6,11 +6,15 @@ from django.db import models
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
 
 from .forms import AlumnoForm, CarreraForm, MateriaForm
 from .models import Alumno, Carrera, Inscripcion, Materia, Usuario
 from .services import inscribir_alumno
+
+
+class HomeView(TemplateView):
+    template_name = 'home.html'
 
 
 class RolRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
