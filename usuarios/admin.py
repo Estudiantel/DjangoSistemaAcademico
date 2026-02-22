@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Alumno, Carrera, Inscripcion, Materia, Usuario
+from .models import Alumno, Carrera, Docente, Inscripcion, Materia, Usuario
 
 
 @admin.register(Alumno)
@@ -11,6 +11,14 @@ class AlumnoAdmin(admin.ModelAdmin):
     fields = ('nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera')
 
 
+
+
+@admin.register(Docente)
+class DocenteAdmin(admin.ModelAdmin):
+    list_display = ('apellido', 'nombre', 'dni', 'email', 'especialidad')
+    search_fields = ('apellido', 'nombre', 'dni', 'email', 'especialidad')
+    fields = ('nombre', 'apellido', 'dni', 'email', 'especialidad')
+
 @admin.register(Carrera)
 class CarreraAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'duracion')
@@ -19,9 +27,9 @@ class CarreraAdmin(admin.ModelAdmin):
 
 @admin.register(Materia)
 class MateriaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'carrera', 'cupo_maximo')
-    search_fields = ('nombre', 'carrera__nombre')
-    list_filter = ('carrera',)
+    list_display = ('nombre', 'carrera', 'profesor', 'cupo_maximo')
+    search_fields = ('nombre', 'carrera__nombre', 'profesor__apellido', 'profesor__nombre')
+    list_filter = ('carrera', 'profesor')
 
 
 @admin.register(Inscripcion)
@@ -35,18 +43,18 @@ class InscripcionAdmin(admin.ModelAdmin):
 class UsuarioAdmin(UserAdmin):
     model = Usuario
     ordering = ('dni',)
-    list_display = ('dni', 'email', 'rol', 'is_staff', 'debe_cambiar_password', 'alumno')
+    list_display = ('dni', 'email', 'rol', 'is_staff', 'debe_cambiar_password', 'alumno', 'docente')
     search_fields = ('dni', 'email', 'username')
 
     fieldsets = UserAdmin.fieldsets + (
         (
             'Datos académicos',
-            {'fields': ('dni', 'rol', 'debe_cambiar_password', 'alumno')},
+            {'fields': ('dni', 'rol', 'debe_cambiar_password', 'alumno', 'docente')},
         ),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
         (
             'Datos académicos',
-            {'fields': ('dni', 'email', 'rol', 'debe_cambiar_password', 'alumno')},
+            {'fields': ('dni', 'email', 'rol', 'debe_cambiar_password', 'alumno', 'docente')},
         ),
     )

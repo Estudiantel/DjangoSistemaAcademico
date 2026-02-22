@@ -8,8 +8,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
 
-from .forms import AlumnoForm, CarreraForm, MateriaForm
-from .models import Alumno, Carrera, Inscripcion, Materia, Usuario
+from .forms import AlumnoForm, CarreraForm, DocenteForm, MateriaForm
+from .models import Alumno, Carrera, Docente, Inscripcion, Materia, Usuario
 from .services import inscribir_alumno
 
 
@@ -141,7 +141,7 @@ class MateriaListView(RolRequiredMixin, ListView):
     allowed_roles = (Usuario.Rol.ADMINISTRADOR, Usuario.Rol.INVITADO, Usuario.Rol.ALUMNO)
 
     def get_queryset(self):
-        queryset = Materia.objects.select_related('carrera')
+        queryset = Materia.objects.select_related('carrera', 'profesor')
         user = self.request.user
         if user.is_superuser or user.rol == Usuario.Rol.ADMINISTRADOR:
             carrera_id = self.request.GET.get('carrera')
@@ -219,6 +219,78 @@ class AlumnoDeleteView(RolRequiredMixin, ProtectedDeleteMixin, DeleteSuccessMess
     success_url = reverse_lazy('usuarios:alumno-list')
     success_message = 'Alumno eliminado correctamente.'
     allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+
+class DocenteListView(RolRequiredMixin, ListView):
+    model = Docente
+    template_name = 'usuarios/docente_list.html'
+    context_object_name = 'docentes'
+    allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+
+class DocenteCreateView(RolRequiredMixin, SuccessMessageMixin, CreateView):
+    model = Docente
+    form_class = DocenteForm
+    template_name = 'usuarios/docente_form.html'
+    success_url = reverse_lazy('usuarios:docente-list')
+    success_message = 'Docente creado correctamente.'
+    extra_context = {'titulo': 'Crear Docente'}
+    allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+
+class DocenteUpdateView(RolRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = Docente
+    form_class = DocenteForm
+    template_name = 'usuarios/docente_form.html'
+    success_url = reverse_lazy('usuarios:docente-list')
+    success_message = 'Docente actualizado correctamente.'
+    extra_context = {'titulo': 'Editar Docente'}
+    allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+
+class DocenteDeleteView(RolRequiredMixin, ProtectedDeleteMixin, DeleteSuccessMessageMixin, DeleteView):
+    model = Docente
+    template_name = 'usuarios/docente_confirm_delete.html'
+    success_url = reverse_lazy('usuarios:docente-list')
+    success_message = 'Docente eliminado correctamente.'
+    allowed_roles = (Usuario.Rol.ADMINISTRADOR,)
+
+
+class MisMateriasDocenteView(RolRequiredMixin, ListView):
+    model = Materia
+    template_name = 'usuarios/mis_catedras_docente.html'
+    context_object_name = 'materias'
+    allowed_roles = (Usuario.Rol.DOCENTE,)
+
+    def get_queryset(self):
+        docente = self.request.user.docente
+        if not docente:
+            return Materia.objects.none()
+        return Materia.objects.filter(profesor=docente).select_related('carrera').order_by('nombre')
+
+
+class MateriaAlumnosDocenteListView(RolRequiredMixin, ListView):
+    model = Inscripcion
+    template_name = 'usuarios/materia_alumnos_docente_list.html'
+    context_object_name = 'inscripciones'
+    allowed_roles = (Usuario.Rol.DOCENTE,)
+
+    def dispatch(self, request, *args, **kwargs):
+        docente = request.user.docente
+        self.materia = get_object_or_404(Materia, pk=kwargs['pk'], profesor=docente)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return (
+            Inscripcion.objects.filter(materia=self.materia)
+            .select_related('alumno')
+            .order_by('alumno__apellido', 'alumno__nombre')
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['materia'] = self.materia
+        return context
 
 
 class OfertaAcademicaView(RolRequiredMixin, ListView):
