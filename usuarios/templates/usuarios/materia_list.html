@@ -33,6 +33,7 @@
       <tr>
         <th>Nombre</th>
         <th>Carrera</th>
+        <th>Profesor</th>
         <th>Cupo máximo</th>
         <th>Cupo disponible</th>
         {% if user.is_superuser or user.rol == 'ADMINISTRADOR' %}
@@ -45,6 +46,7 @@
         <tr>
           <td>{{ materia.nombre }}</td>
           <td>{{ materia.carrera.nombre }}</td>
+          <td>{% if materia.profesor %}{{ materia.profesor.apellido }}, {{ materia.profesor.nombre }}{% else %}-{% endif %}</td>
           <td>{{ materia.cupo_maximo }}</td>
           <td>{{ materia.cupo_disponible }}</td>
           {% if user.is_superuser or user.rol == 'ADMINISTRADOR' %}
@@ -56,7 +58,7 @@
           {% endif %}
         </tr>
       {% empty %}
-        <tr><td colspan="5" class="text-center">No hay materias cargadas.</td></tr>
+        <tr><td colspan="6" class="text-center">No hay materias cargadas.</td></tr>
       {% endfor %}
     </tbody>
   </table>

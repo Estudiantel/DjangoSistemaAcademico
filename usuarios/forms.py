@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Alumno, Carrera, Materia
+from .models import Alumno, Carrera, Docente, Materia
 
 
 class BootstrapModelForm(forms.ModelForm):
@@ -23,7 +23,7 @@ class CarreraForm(BootstrapModelForm):
 class MateriaForm(BootstrapModelForm):
     class Meta:
         model = Materia
-        fields = ['nombre', 'carrera', 'cupo_maximo']
+        fields = ['nombre', 'carrera', 'profesor', 'cupo_maximo']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,3 +35,9 @@ class AlumnoForm(BootstrapModelForm):
     class Meta:
         model = Alumno
         fields = ['nombre', 'apellido', 'dni', 'email', 'legajo', 'carrera']
+
+
+class DocenteForm(BootstrapModelForm):
+    class Meta:
+        model = Docente
+        fields = ['nombre', 'apellido', 'dni', 'email', 'especialidad']

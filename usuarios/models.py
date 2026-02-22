@@ -58,6 +58,10 @@ class Alumno(Persona):
     )
 
 
+class Docente(Persona):
+    especialidad = models.CharField(max_length=150, blank=True)
+
+
 class Carrera(models.Model):
     nombre = models.CharField(max_length=150, unique=True)
     duracion = models.PositiveIntegerField(help_text='Duración en años.')
@@ -69,6 +73,13 @@ class Carrera(models.Model):
 class Materia(models.Model):
     nombre = models.CharField(max_length=150)
     carrera = models.ForeignKey(Carrera, on_delete=models.PROTECT, related_name='materias')
+    profesor = models.ForeignKey(
+        Docente,
+        on_delete=models.SET_NULL,
+        related_name='materias',
+        null=True,
+        blank=True,
+    )
     cupo_maximo = models.PositiveIntegerField()
 
     class Meta:
@@ -108,6 +119,7 @@ class Usuario(AbstractUser):
     class Rol(models.TextChoices):
         ADMINISTRADOR = 'ADMINISTRADOR', 'Administrador'
         ALUMNO = 'ALUMNO', 'Alumno'
+        DOCENTE = 'DOCENTE', 'Docente'
         INVITADO = 'INVITADO', 'Invitado'
 
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
@@ -123,6 +135,14 @@ class Usuario(AbstractUser):
         related_name='usuario',
         help_text='Vincular cuando el usuario tenga rol Alumno.',
     )
+    docente = models.OneToOneField(
+        Docente,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='usuario',
+        help_text='Vincular cuando el usuario tenga rol Docente.',
+    )
 
     USERNAME_FIELD = 'dni'
     REQUIRED_FIELDS = ['email']
@@ -134,4 +154,6 @@ class Usuario(AbstractUser):
             self.username = self.dni
         if self.rol != self.Rol.ALUMNO:
             self.alumno = None
+        if self.rol != self.Rol.DOCENTE:
+            self.docente = None
         super().save(*args, **kwargs)

@@ -21,6 +21,10 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:materia-list' %}">Materias</a></li>
           {% if user.is_superuser or user.rol == 'ADMINISTRADOR' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:alumno-list' %}">Alumnos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:docente-list' %}">Gestión de Docentes</a></li>
+          {% endif %}
+          {% if user.rol == 'DOCENTE' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:mis-catedras-docente' %}">Mis Cátedras</a></li>
           {% endif %}
           {% if user.rol == 'ALUMNO' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'usuarios:oferta-academica' %}">Oferta Académica</a></li>
@@ -34,6 +38,8 @@
             Hola,
             {% if user.alumno %}
               {{ user.alumno.nombre }} {{ user.alumno.apellido }}
+            {% elif user.docente %}
+              {{ user.docente.nombre }} {{ user.docente.apellido }}
             {% else %}
               {{ user.get_full_name|default:user.dni }}
             {% endif %}

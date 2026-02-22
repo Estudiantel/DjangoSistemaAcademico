@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">{{ titulo }}</h1>
+<form method="post" class="card card-body shadow-sm">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{% url 'usuarios:docente-list' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
